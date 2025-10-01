@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Login con Firebase</title>
+    <title>Sistema de Login Local - Usuario Root</title>
     <style>
+        /* CSS se mantiene casi igual para el diseño base */
         * {
             margin: 0;
             padding: 0;
@@ -32,7 +33,7 @@
             overflow-y: auto;
         }
 
-        .login-section h2, .register-section h2 {
+        .login-section h2, .dashboard h2 {
             text-align: center;
             margin-bottom: 1.5rem;
             color: #333;
@@ -76,101 +77,46 @@
             cursor: pointer;
             transition: transform 0.2s ease;
             margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .btn-action {
+            width: calc(50% - 10px);
+            display: inline-block;
+            margin: 10px 5px;
+        }
+
+        .btn-back {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); /* Naranja para el botón de volver */
+            margin-top: 2rem;
         }
 
         .btn:hover {
             transform: translateY(-2px);
         }
 
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-        }
-
-        .error, .success {
+        .error {
             text-align: center;
             margin: 1rem 0;
             padding: 0.5rem;
             border-radius: 4px;
             display: none;
-        }
-
-        .error {
+            font-weight: bold;
             color: #721c24;
             background-color: #f8d7da;
             border: 1px solid #f5c6cb;
-        }
-
-        .success {
-            color: #155724;
-            background-color: #d4edda;
-            border: 1px solid #c3e6cb;
-        }
-
-        .register-section {
-            border-top: 2px solid #eee;
-            padding-top: 1.5rem;
-            margin-top: 1.5rem;
-        }
-
-        .users-list {
-            margin-top: 2rem;
-            padding: 1rem;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-
-        .users-list h3 {
-            color: #333;
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-
-        .user-item {
-            padding: 0.5rem;
-            margin: 0.5rem 0;
-            background: white;
-            border-radius: 4px;
-            border-left: 4px solid #667eea;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
         .dashboard {
             display: none;
             text-align: center;
         }
-
-        .dashboard h2 {
-            color: #333;
-            margin-bottom: 2rem;
-        }
-
-        .info-section {
-            background: #f8f9fa;
-            padding: 1.5rem;
-            border-radius: 10px;
-            margin: 1rem 0;
-            text-align: left;
-        }
-
-        .info-item {
-            margin: 0.8rem 0;
-            padding: 0.5rem;
-            background: white;
-            border-left: 4px solid #667eea;
-            border-radius: 4px;
-        }
-
-        .logout-btn {
-            background: #e74c3c;
-            margin-top: 2rem;
+        
+        /* Nueva sección para mostrar el detalle del botón */
+        .button-detail-section {
+            display: none;
+            text-align: center;
+            padding: 2rem 0;
         }
 
         .welcome-user {
@@ -179,301 +125,157 @@
             margin-bottom: 1rem;
         }
 
-        .loading {
-            display: none;
-            text-align: center;
-            color: #667eea;
+        .logout-btn {
+            background: #e74c3c;
+            margin-top: 2rem;
         }
+
+        .button-actions {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: space-around;
+        }
+        
+        .detail-message {
+            margin-top: 1.5rem;
+            padding: 2rem;
+            border-radius: 8px;
+            background: #f0f8ff;
+            color: #333;
+            font-size: 1.2em;
+            font-weight: 600;
+            border: 3px solid #667eea;
+        }
+
+        /* Secciones no usadas se ocultan */
+        .register-section, .users-list, .loading, .success {
+            display: none !important; 
+        }
+
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Sección de Login y Registro -->
         <div class="auth-section" id="authSection">
-            <!-- Login Form -->
             <div class="login-section">
                 <h2>Iniciar Sesión</h2>
+                <p style="text-align: center; margin-bottom: 1rem; color: #555;">
+                    **Usuario de demostración: root / root**
+                </p>
                 <form id="loginForm">
                     <div class="form-group">
                         <label for="loginUsername">Usuario:</label>
-                        <input type="text" id="loginUsername" required>
+                        <input type="text" id="loginUsername" required value="root">
                     </div>
                     <div class="form-group">
                         <label for="loginPassword">Contraseña:</label>
-                        <input type="password" id="loginPassword" required>
+                        <input type="password" id="loginPassword" required value="root">
                     </div>
                     <button type="submit" class="btn" id="loginBtn">Iniciar Sesión</button>
                 </form>
             </div>
 
-            <!-- Register Form -->
-            <div class="register-section">
-                <h2>Crear Nueva Cuenta</h2>
-                <form id="registerForm">
-                    <div class="form-group">
-                        <label for="registerUsername">Usuario:</label>
-                        <input type="text" id="registerUsername" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="registerPassword">Contraseña:</label>
-                        <input type="password" id="registerPassword" required minlength="6">
-                    </div>
-                    <button type="submit" class="btn btn-secondary" id="registerBtn">Crear Cuenta</button>
-                </form>
-            </div>
-
-            <!-- Messages -->
             <div class="error" id="errorMessage"></div>
-            <div class="success" id="successMessage"></div>
-            <div class="loading" id="loadingMessage">Cargando...</div>
-
-            <!-- Users List -->
-            <div class="users-list">
-                <h3>Usuarios Registrados</h3>
-                <div id="usersList">
-                    <div class="loading">Cargando usuarios...</div>
-                </div>
-            </div>
         </div>
 
-        <!-- Dashboard después del login -->
         <div class="dashboard" id="dashboard">
-            <h2>Panel de Control</h2>
+            <h2>Panel de Control Principal</h2>
             <div class="welcome-user" id="welcomeMessage"></div>
             
-            <div class="info-section">
-                <h3>Información del Sistema</h3>
-                <div class="info-item">
-                    <strong>Fecha de acceso:</strong> <span id="accessDate"></span>
-                </div>
-                <div class="info-item">
-                    <strong>Usuario activo:</strong> <span id="activeUser"></span>
-                </div>
-                <div class="info-item">
-                    <strong>Sesión ID:</strong> <span id="sessionId"></span>
-                </div>
-            </div>
+            <p style="color: #666; margin-bottom: 1.5rem;">
+                Selecciona una de las opciones disponibles:
+            </p>
 
-            <div class="info-section">
-                <h3>Datos de la Empresa</h3>
-                <div class="info-item">
-                    <strong>Ventas del mes:</strong> $45,230.50
-                </div>
-                <div class="info-item">
-                    <strong>Clientes activos:</strong> 1,247
-                </div>
-                <div class="info-item">
-                    <strong>Productos en stock:</strong> 3,891
-                </div>
-                <div class="info-item">
-                    <strong>Pedidos pendientes:</strong> 999
-                </div>
-            </div>
-
-            <div class="info-section">
-                <h3>Reportes Disponibles</h3>
-                <div class="info-item">
-                    ✓ Reporte de ventas mensual
-                </div>
-                <div class="info-item">
-                    ✓ Análisis de inventario
-                </div>
-                <div class="info-item">
-                    ✓ Estado de pedidos
-                </div>
-                <div class="info-item">
-                    ✓ Métricas de clientes
-                </div>
+            <div class="button-actions">
+                <button class="btn btn-action" onclick="showDetail('detail1')">Boton1</button>
+                <button class="btn btn-action" onclick="showDetail('detail2')">Boton2</button>
             </div>
 
             <button class="btn logout-btn" onclick="logout()">Cerrar Sesión</button>
         </div>
+        
+        <div class="button-detail-section" id="detail1">
+            <h2>Detalle de Boton1</h2>
+            <div class="detail-message">
+                **¡🥳 Haz logrado acceder al Boton1!**
+            </div>
+            <button class="btn btn-back" onclick="showDashboard()">← Volver al Panel</button>
+        </div>
+
+        <div class="button-detail-section" id="detail2">
+            <h2>Detalle de Boton2</h2>
+            <div class="detail-message">
+                **¡🥳 Haz logrado acceder al Boton2!**
+            </div>
+            <button class="btn btn-back" onclick="showDashboard()">← Volver al Panel</button>
+        </div>
     </div>
 
-    <!-- Firebase SDKs -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-firestore-compat.min.js"></script>
-
     <script>
-        // Configuración de Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyASzrP-g563NbwLQVp7PuJjCwt_1vV1Hr8",
-            authDomain: "web-a1ab4.firebaseapp.com",
-            projectId: "web-a1ab4",
-            storageBucket: "web-a1ab4.firebasestorage.app",
-            messagingSenderId: "1094677513308",
-            appId: "1:1094677513308:web:3467c367fc8c1338219299",
-            measurementId: "G-EZ48L1H2B5"
-        };
-
-        // Inicializar Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
+        // Credenciales Fijas
+        const ROOT_USER = 'root';
+        const ROOT_PASS = 'root'; 
+        
         let currentUser = null;
 
         // Event Listeners
         document.getElementById('loginForm').addEventListener('submit', handleLogin);
-        document.getElementById('registerForm').addEventListener('submit', handleRegister);
 
-        // Cargar usuarios al iniciar
-        loadUsers();
+        // --- Funciones de Navegación y UI ---
 
-        // Función simple para hash de contraseña (solo para demo)
-        function simpleHash(str) {
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                const char = str.charCodeAt(i);
-                hash = ((hash << 5) - hash) + char;
-                hash = hash & hash; // Convert to 32bit integer
-            }
-            return hash.toString();
+        /** Muestra el panel de control y oculta todos los demás detalles. */
+        function showDashboard() {
+            // Ocultar todas las secciones de detalle
+            document.querySelectorAll('.button-detail-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            // Mostrar el dashboard
+            document.getElementById('dashboard').style.display = 'block';
         }
 
-        // Manejar Login
-        async function handleLogin(e) {
+        /** Muestra la sección de detalle especificada y oculta el dashboard. */
+        function showDetail(detailId) {
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById(detailId).style.display = 'block';
+        }
+
+        /** Maneja el intento de inicio de sesión con credenciales fijas. */
+        function handleLogin(e) {
             e.preventDefault();
             
             const username = document.getElementById('loginUsername').value;
             const password = document.getElementById('loginPassword').value;
             
-            showLoading(true);
-            hideMessages();
+            hideError();
 
-            try {
-                // Buscar usuario en Firestore
-                const userQuery = await db.collection('users')
-                    .where('username', '==', username)
-                    .get();
-
-                if (userQuery.empty) {
-                    showError('Usuario no encontrado');
-                    return;
-                }
-
-                const userDoc = userQuery.docs[0];
-                const userData = userDoc.data();
-                const hashedPassword = simpleHash(password);
-
-                if (userData.password === hashedPassword) {
-                    currentUser = {
-                        id: userDoc.id,
-                        username: userData.username,
-                        createdAt: userData.createdAt
-                    };
-                    showDashboard();
-                } else {
-                    showError('Contraseña incorrecta');
-                }
-            } catch (error) {
-                showError('Error al iniciar sesión: ' + error.message);
-            } finally {
-                showLoading(false);
+            if (username === ROOT_USER && password === ROOT_PASS) {
+                currentUser = username;
+                document.getElementById('authSection').style.display = 'none';
+                document.getElementById('welcomeMessage').textContent = `¡Bienvenido, ${currentUser}!`;
+                showDashboard(); // Mostrar el Dashboard principal
+            } else {
+                showError('Usuario o contraseña incorrectos. Usa root / root.');
             }
         }
 
-        // Manejar Registro
-        async function handleRegister(e) {
-            e.preventDefault();
-            
-            const username = document.getElementById('registerUsername').value;
-            const password = document.getElementById('registerPassword').value;
-
-            showLoading(true);
-            hideMessages();
-
-            try {
-                // Verificar si el usuario ya existe
-                const existingUserQuery = await db.collection('users')
-                    .where('username', '==', username)
-                    .get();
-
-                if (!existingUserQuery.empty) {
-                    showError('El usuario ya existe');
-                    return;
-                }
-
-                // Crear nuevo usuario
-                const hashedPassword = simpleHash(password);
-                
-                await db.collection('users').add({
-                    username: username,
-                    password: hashedPassword,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                showSuccess('Usuario creado exitosamente. Puedes iniciar sesión ahora.');
-                document.getElementById('registerForm').reset();
-                loadUsers(); // Recargar la lista de usuarios
-            } catch (error) {
-                showError('Error al crear usuario: ' + error.message);
-            } finally {
-                showLoading(false);
-            }
-        }
-
-        // Cargar lista de usuarios
-        async function loadUsers() {
-            try {
-                const snapshot = await db.collection('users').orderBy('createdAt', 'desc').get();
-                const usersList = document.getElementById('usersList');
-                
-                if (snapshot.empty) {
-                    usersList.innerHTML = '<p style="text-align: center; color: #666;">No hay usuarios registrados</p>';
-                    return;
-                }
-
-                let usersHTML = '';
-                snapshot.forEach(doc => {
-                    const userData = doc.data();
-                    const createdAt = userData.createdAt ? userData.createdAt.toDate().toLocaleDateString('es-ES') : 'Fecha no disponible';
-                    
-                    usersHTML += `
-                        <div class="user-item">
-                            <div>
-                                <strong>${userData.username}</strong><br>
-                                <small>Usuario registrado</small>
-                            </div>
-                            <div style="text-align: right; font-size: 12px; color: #666;">
-                                ${createdAt}
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                usersList.innerHTML = usersHTML;
-            } catch (error) {
-                document.getElementById('usersList').innerHTML = '<p style="text-align: center; color: #e74c3c;">Error al cargar usuarios</p>';
-                console.error('Error loading users:', error);
-            }
-        }
-
-        // Mostrar Dashboard
-        function showDashboard() {
-            document.getElementById('authSection').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'block';
-            
-            // Actualizar información del dashboard
-            document.getElementById('welcomeMessage').textContent = `¡Bienvenido, ${currentUser.username}!`;
-            document.getElementById('activeUser').textContent = currentUser.username;
-            document.getElementById('accessDate').textContent = new Date().toLocaleString('es-ES');
-            document.getElementById('sessionId').textContent = 'SID_' + Math.random().toString(36).substr(2, 9);
-        }
-
-        // Cerrar sesión
+        /** Cierra la sesión y regresa a la pantalla de login. */
         function logout() {
             currentUser = null;
             
+            // Ocultar dashboard y detalles
             document.getElementById('dashboard').style.display = 'none';
-            document.getElementById('authSection').style.display = 'block';
-            
-            // Limpiar formularios
-            document.getElementById('loginForm').reset();
-            document.getElementById('registerForm').reset();
-            hideMessages();
-        }
+            document.querySelectorAll('.button-detail-section').forEach(section => {
+                section.style.display = 'none';
+            });
 
-        // Funciones de utilidad
+            // Mostrar sección de autenticación y limpiar formulario
+            document.getElementById('authSection').style.display = 'block';
+            document.getElementById('loginForm').reset();
+            hideError();
+        }
+        
+        // --- Funciones de Mensajes ---
+
         function showError(message) {
             const errorDiv = document.getElementById('errorMessage');
             errorDiv.textContent = message;
@@ -481,25 +283,10 @@
             setTimeout(() => errorDiv.style.display = 'none', 5000);
         }
 
-        function showSuccess(message) {
-            const successDiv = document.getElementById('successMessage');
-            successDiv.textContent = message;
-            successDiv.style.display = 'block';
-            setTimeout(() => successDiv.style.display = 'none', 5000);
-        }
-
-        function showLoading(show) {
-            const loadingDiv = document.getElementById('loadingMessage');
-            const buttons = document.querySelectorAll('.btn');
-            
-            loadingDiv.style.display = show ? 'block' : 'none';
-            buttons.forEach(btn => btn.disabled = show);
-        }
-
-        function hideMessages() {
+        function hideError() {
             document.getElementById('errorMessage').style.display = 'none';
-            document.getElementById('successMessage').style.display = 'none';
         }
+
     </script>
 </body>
 </html>
